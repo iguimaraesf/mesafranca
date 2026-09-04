@@ -1,0 +1,52 @@
+# Compilação
+target/
+out/
+build/
+
+# IDEs
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# VS Code
+.vscode/
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/.nb-gradle/
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+
+# Logs
+*.log
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# Arquivos temporários
+*.tmp
+*.temp
+*.swp
+*.swo
+
+# Maven
+.releaseBackup
+dependency-reduced-pom.xml
+.flattened-pom.xml
+
+# Gradle (caso seja usado futuramente)
+.gradle/
+!gradle/wrapper/gradle-wrapper.jar

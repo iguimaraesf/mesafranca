@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>br.com.mesafranca</groupId>
+    <artifactId>mesa-api</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>mesa-arquitetura</artifactId>
+  <name>Mesa Franca :: Arquitetura</name>
+  <description>Modulo sem codigo de producao: so os testes de fronteira sobre todo o repositorio.</description>
+
+  <properties>
+    <!-- Nao ha classe de producao aqui; nada a cobrir. -->
+    <cobertura.linhas>0.00</cobertura.linhas>
+    <cobertura.branches>0.00</cobertura.branches>
+    <!--
+      Sem artefato para instalar ou publicar: o modulo so existe para os
+      testes de fronteira. Sem estas duas linhas, `mvn install` reclamaria de
+      um artefato sem arquivo.
+    -->
+    <maven.install.skip>true</maven.install.skip>
+    <maven.deploy.skip>true</maven.deploy.skip>
+  </properties>
+
+  <dependencies>
+    <dependency><groupId>br.com.mesafranca</groupId><artifactId>mesa-core</artifactId></dependency>
+    <dependency><groupId>br.com.mesafranca</groupId><artifactId>mesa-adapters</artifactId></dependency>
+    <dependency><groupId>br.com.mesafranca</groupId><artifactId>mesa-ludo</artifactId></dependency>
+    <dependency><groupId>br.com.mesafranca</groupId><artifactId>mesa-love-letter</artifactId></dependency>
+    <dependency><groupId>br.com.mesafranca</groupId><artifactId>mesa-uno</artifactId></dependency>
+    <dependency>
+      <groupId>com.tngtech.archunit</groupId>
+      <artifactId>archunit-junit5</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <!--
+        Nao empacota nada. Como o modulo nao tem src/main/java, o jar sairia
+        vazio e o Maven avisaria "JAR will be empty" em toda execucao.
+        A versao e deliberadamente omitida: assim vale a que o proprio Maven
+        gerencia no super-POM, e nao um numero fixado aqui as cegas.
+      -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>default-jar</id>
+            <phase>none</phase>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

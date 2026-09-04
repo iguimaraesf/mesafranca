@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>br.com.mesafranca</groupId>
+    <artifactId>mesa-games</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>mesa-ludo</artifactId>
+  <name>Mesa Franca :: Ludo</name>
+
+  <properties>
+    <cobertura.linhas>0.95</cobertura.linhas>
+    <cobertura.branches>0.90</cobertura.branches>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>br.com.mesafranca</groupId>
+      <artifactId>mesa-core</artifactId>
+    </dependency>
+  </dependencies>
+</project>
