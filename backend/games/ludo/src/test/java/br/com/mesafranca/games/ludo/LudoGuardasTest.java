@@ -72,12 +72,16 @@ class LudoGuardasTest {
     @Test
     void casa_na_pista_so_existe_para_quem_esta_na_pista() {
         List<IdJogador> assentos = List.of(ANA, BRUNO);
+        int numeroDeJogadores = assentos.size();
+        int ultimoAvanco = LudoEstado.calcularUltimoAvancoNaPista(numeroDeJogadores);
+        int avancoFinal = LudoEstado.calcularAvancoFinal(numeroDeJogadores);
+        int casasNaPista = LudoEstado.calcularCasasNaPista(numeroDeJogadores);
+
         Map<IdJogador, Integer> entradas = new LinkedHashMap<>();
         entradas.put(ANA, 0);
-        entradas.put(BRUNO, 26);
+        entradas.put(BRUNO, casasNaPista / 2);
         Map<IdJogador, List<Integer>> pecas = new LinkedHashMap<>();
-        pecas.put(ANA, List.of(LudoEstado.NA_BASE, 0, LudoEstado.ULTIMO_AVANCO_NA_PISTA,
-                LudoEstado.AVANCO_FINAL));
+        pecas.put(ANA, List.of(LudoEstado.NA_BASE, 0, ultimoAvanco, avancoFinal));
         pecas.put(BRUNO, List.of(-1, -1, -1, -1));
         LudoEstado estado = new LudoEstado(assentos, entradas, pecas,
                 new OrdemDeTurno(assentos, 0, OrdemDeTurno.Sentido.HORARIO, Set.of()),
@@ -85,11 +89,11 @@ class LudoGuardasTest {
 
         assertThat(estado.casaNaPista(ANA, LudoEstado.NA_BASE)).isEmpty();
         assertThat(estado.casaNaPista(ANA, 0)).contains(0);
-        assertThat(estado.casaNaPista(ANA, LudoEstado.ULTIMO_AVANCO_NA_PISTA)).contains(50);
-        assertThat(estado.casaNaPista(ANA, 51)).isEmpty();
-        assertThat(estado.casaNaPista(ANA, LudoEstado.AVANCO_FINAL)).isEmpty();
-        // Entrada 26 e avanço 30 dão a volta no tabuleiro de 52 casas.
-        assertThat(estado.casaNaPista(BRUNO, 30)).contains(4);
+        assertThat(estado.casaNaPista(ANA, ultimoAvanco)).contains(ultimoAvanco);
+        assertThat(estado.casaNaPista(ANA, ultimoAvanco + 1)).isEmpty();
+        assertThat(estado.casaNaPista(ANA, avancoFinal)).isEmpty();
+        // Entrada 13 e avanço 15 dão a volta no tabuleiro de 26 casas.
+        assertThat(estado.casaNaPista(BRUNO, 15)).contains(2);
 
         assertThat(estado.chegou(ANA, 3)).isTrue();
         assertThat(estado.chegou(ANA, 0)).isFalse();

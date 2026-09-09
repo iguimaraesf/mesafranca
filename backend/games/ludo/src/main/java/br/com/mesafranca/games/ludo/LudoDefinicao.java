@@ -26,12 +26,23 @@ import java.util.Optional;
  * Todo lance passa por {@link FonteDeAleatoriedade}, o que torna qualquer
  * partida reproduzível a partir da semente.
  *
- * <p><strong>Fora do escopo desta implementação, deliberadamente:</strong>
- * casas seguras, tabuleiros de 5 e 6 jogadores, e a regra de bônus por
- * chegada. Duas peças do mesmo jogador não dividem uma posição — no Ludo
- * oficial elas formariam um bloqueio, e bloqueio é justamente o que está
- * fora do escopo. O que está aqui é o ciclo completo: sair da base,
- * percorrer, capturar, entrar na coluna final e vencer.
+ * <p><strong>Funcionalidades futuras (não implementadas):</strong>
+ * <ul>
+ *   <li>Casas protegidas (safe spots) - configurable por partida</li>
+ *   <li>Opção de 2 ou 4 peças por jogador - configurable por partida</li>
+ *   <li>Bloqueio (duas peças do mesmo jogador na mesma casa)</li>
+ *   <li>Regra de bônus por chegada</li>
+ *   <li>Tabuleiros especiais de 5 e 6 jogadores (já suportado pelo adaptativo)</li>
+ * </ul>
+ *
+ * <p><strong>Implementado:</strong>
+ * <ul>
+ *   <li>Tabuleiro adaptativo (oval, triângulo, quadrado, pentágono, hexágono)</li>
+ *   <li>Sair da base com 1 ou 6</li>
+ *   <li>Seis dá outra vez, três seis seguidos perdem a vez</li>
+ *   <li>Captura e chegada dão outra vez</li>
+ *   <li>Ciclo completo: sair da base, percorrer, capturar, coluna final, vencer</li>
+ * </ul>
  */
 public final class LudoDefinicao implements DefinicaoDeJogo {
 
@@ -129,6 +140,7 @@ public final class LudoDefinicao implements DefinicaoDeJogo {
     private static Transicao rolar(
             LudoEstado atual, IdJogador jogador, FonteDeAleatoriedade aleatoriedade) {
         int valor = aleatoriedade.dado(LudoEstado.FACES_DO_DADO);
+        // Só conta seis seguidos quando realmente sai 6 (não quando sai 1)
         int seguidos = valor == LudoEstado.FACES_DO_DADO ? atual.seisSeguidos() + 1 : 0;
         List<Evento> eventos = new ArrayList<>();
         eventos.add(new LudoEvento.DadoRolado(jogador, valor));
@@ -154,7 +166,27 @@ public final class LudoDefinicao implements DefinicaoDeJogo {
             eventos.add(new LudoEvento.PecaSaiuDaBase(
                     jogador, mover.peca(), depois.casaNaPista(jogador, 0).orElseThrow()));
         } else {
-            eventos.add(new LudoEvento.PecaMovida(jogador, mover.peca(), origem, destino));
+            // Evento mostra casas absolutas para o front-end renderizar corretamente
+            // Se estiver na coluna final, usa o avanço diretamente (para o front-end desenhar)
+            int numeroDeJogadores = atual.assentos().size();
+            int ultimoAvanco = LudoEstado.calcularUltimoAvancoNaPista(numeroDeJogadores);
+
+            int casaOrigem, casaDestino;
+            if (origem > ultimoAvanco) {
+                // Na coluna final - usa avanço como posição para o front-end
+                casaOrigem = origem;
+            } else {
+                casaOrigem = atual.casaNaPista(jogador, origem).orElseThrow();
+            }
+
+            if (destino > ultimoAvanco) {
+                // Na coluna final - usa avanço como posição para o front-end
+                casaDestino = destino;
+            } else {
+                casaDestino = depois.casaNaPista(jogador, destino).orElseThrow();
+            }
+
+            eventos.add(new LudoEvento.PecaMovida(jogador, mover.peca(), casaOrigem, casaDestino));
         }
 
         boolean capturou = false;
@@ -175,9 +207,11 @@ public final class LudoDefinicao implements DefinicaoDeJogo {
             }
         }
 
-        boolean chegou = destino == LudoEstado.AVANCO_FINAL;
+        int numeroDeJogadores = atual.assentos().size();
+        int avancoFinal = LudoEstado.calcularAvancoFinal(numeroDeJogadores);
+        boolean chegou = destino == avancoFinal;
         if (chegou) {
-            eventos.add(new LudoEvento.PecaChegou(jogador, mover.peca()));
+            eventos.add(new LudoEvento.PecaCompletouPercurso(jogador, mover.peca()));
         }
 
         if (depois.todasChegaram(jogador)) {
@@ -187,6 +221,7 @@ public final class LudoDefinicao implements DefinicaoDeJogo {
 
         // Seis, captura e chegada dão outra vez. É o que faz o Ludo ter turnos
         // encadeados e o que impede o motor de assumir "uma ação, um turno".
+        // Nota: 1 sai da base mas não dá outra vez.
         boolean jogaDeNovo = dado == LudoEstado.FACES_DO_DADO || capturou || chegou;
         LudoEstado semDado = depois.comDado(
                 Optional.empty(), dado == LudoEstado.FACES_DO_DADO ? depois.seisSeguidos() : 0);
@@ -223,29 +258,60 @@ public final class LudoDefinicao implements DefinicaoDeJogo {
     }
 
     /**
+     * Retorna informações sobre o formato do tabuleiro para o front-end renderizar.
+     * Isso permite que o cliente desenhe o tabuleiro corretamente conforme a
+     * quantidade de jogadores (oval, triângulo, quadrado, etc.).
+     */
+    public InformacoesDoTabuleiro informacoesDoTabuleiro(EstadoDeJogo estado) {
+        LudoEstado atual = (LudoEstado) estado;
+        return new InformacoesDoTabuleiro(
+                atual.totalDeCasasNaPista(),
+                atual.casasPorJogador(),
+                atual.posicoesCorredorFinal(),
+                atual.formatoDoTabuleiro(),
+                atual.assentos().size()
+        );
+    }
+
+    /**
+     * DTO para enviar informações do tabuleiro ao front-end.
+     * Futuramente isso pode ser exposto via Visao ou através de um endpoint específico.
+     */
+    public record InformacoesDoTabuleiro(
+            int totalDeCasasNaPista,
+            int casasPorJogador,
+            int posicoesCorredorFinal,
+            String formato,
+            int numeroDeJogadores
+    ) {}
+
+    /**
      * Peças do jogador que podem andar {@code dado} casas.
      *
-     * <p>Uma peça na base só sai com 6. Uma peça na pista ou na coluna só anda
+     * <p>Uma peça na base sai com 1 ou 6. Uma peça na pista ou na coluna só anda
      * se o resultado couber até a casa final — é assim que "precisa do número
      * exato para chegar" fica sendo uma comparação, e não uma regra à parte.
      * Duas peças do mesmo jogador não ocupam a mesma posição.
      */
     static List<Integer> pecasQuePodemMover(LudoEstado estado, IdJogador jogador, int dado) {
         List<Integer> avancos = estado.pecasDe(jogador);
+        int numeroDeJogadores = estado.assentos().size();
+        int avancoFinal = LudoEstado.calcularAvancoFinal(numeroDeJogadores);
         List<Integer> possiveis = new ArrayList<>();
+
         for (int peca = 0; peca < avancos.size(); peca++) {
             int origem = avancos.get(peca);
-            if (origem == LudoEstado.AVANCO_FINAL) {
+            if (origem == avancoFinal) {
                 continue;
             }
             int destino = origem == LudoEstado.NA_BASE ? 0 : origem + dado;
-            if (origem == LudoEstado.NA_BASE && dado != LudoEstado.FACES_DO_DADO) {
+            if (origem == LudoEstado.NA_BASE && dado != 1 && dado != LudoEstado.FACES_DO_DADO) {
                 continue;
             }
-            if (destino > LudoEstado.AVANCO_FINAL) {
+            if (destino > avancoFinal) {
                 continue;
             }
-            if (destino < LudoEstado.AVANCO_FINAL && ocupadaPorPropria(avancos, peca, destino)) {
+            if (destino < avancoFinal && ocupadaPorPropria(avancos, peca, destino)) {
                 continue;
             }
             possiveis.add(peca);

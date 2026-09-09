@@ -9,7 +9,7 @@ import br.com.mesafranca.core.domain.IdJogador;
  */
 public sealed interface LudoEvento extends Evento
         permits LudoEvento.DadoRolado, LudoEvento.PecaSaiuDaBase, LudoEvento.PecaMovida,
-                LudoEvento.PecaCapturada, LudoEvento.PecaChegou, LudoEvento.VezPassada,
+                LudoEvento.PecaCapturada, LudoEvento.PecaCompletouPercurso, LudoEvento.VezPassada,
                 LudoEvento.PartidaVencida {
 
     record DadoRolado(IdJogador jogador, int valor) implements LudoEvento {
@@ -24,7 +24,7 @@ public sealed interface LudoEvento extends Evento
     record PecaCapturada(IdJogador dono, int peca, IdJogador capturador) implements LudoEvento {
     }
 
-    record PecaChegou(IdJogador jogador, int peca) implements LudoEvento {
+    record PecaCompletouPercurso(IdJogador jogador, int peca) implements LudoEvento {
     }
 
     record VezPassada(IdJogador de, IdJogador para) implements LudoEvento {
