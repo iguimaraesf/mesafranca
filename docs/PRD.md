@@ -1974,6 +1974,11 @@ Estas perguntas não bloqueiam o início da implementação do Core, mas
 bloqueiam decisões posteriores. Devem ser respondidas antes das fases
 indicadas.
 
+> **Q1, Q3, Q4 e Q6 têm respostas propostas em nível de hipótese no
+> [Business Model Canvas](BUSINESS-CANVAS.md) (v1.0, 06/09/2026).** São
+> hipóteses a testar, não decisões: enquanto não forem validadas com
+> usuários reais, este PRD continua sendo a autoridade sobre o produto.
+
 | # | Questão | Bloqueia |
 |---|---------|----------|
 | Q1 | Há intenção de monetizar? Assinatura, compra por jogo, gratuito? | Modelo de conta, catálogo, escopo de v1 |

@@ -10,6 +10,7 @@ apresentam. O nome está registrado na
 | Pergunta | Arquivo |
 |----------|---------|
 | O que o produto é e exige | [docs/PRD.md](docs/PRD.md) |
+| Modelo de negócio e hipóteses | [docs/BUSINESS-CANVAS.md](docs/BUSINESS-CANVAS.md) |
 | Por que cada decisão técnica | [docs/adr/](docs/adr/README.md) |
 | Como o código se organiza | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
 | Como se testa | [docs/TESTING.md](docs/TESTING.md) |
